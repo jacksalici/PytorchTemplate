@@ -1,5 +1,3 @@
-# Toy Sorting Task Configuration
-# This configuration is for training a transformer to sort sequences
 
 # General settings
 seed: 42
@@ -8,10 +6,10 @@ device: "auto"
 
 # Training settings
 lr: 0.0005  
-batch_size: 64  # Smaller batch size for more stable training
-num_epochs: 10
+batch_size: 64  
+num_epochs: 5
 
-# Model settings - Transformer is best for sequence tasks
+# Model settings
 model_name: "transformer"
 input_dim: 3 
 embed_dim: 128
@@ -23,13 +21,12 @@ transformer_num_layers: 2
 ff_dim: 96 
 dropout_rate: 0.1  
 attention_dropout: 0.1
-max_seq_len: 11
 
 # Task settings
 experiment: "toysort"
 dataloader: "toysort_ds"
 
-# Toy sorting specific settings
+# Task specific settings
 sequence_length: 6
 num_digits: 3
 
@@ -38,5 +35,5 @@ optim: "adamw"
 
 # Logging and saving
 avoid_wandb: true
-save_model: false
+save_model: true
 checkpoint_path: "checkpoints"

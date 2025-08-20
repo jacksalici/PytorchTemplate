@@ -4,23 +4,6 @@ from .base import BaseModel
 
 import torch.nn.functional as F
 
-class CustomCrossEntropyLoss(nn.Module):
-    """
-    Custom cross entropy loss for transformer model with support for ignore_index.
-    """
-    def __init__(self, ):
-        super().__init__()
-    
-    def forward(self, predictions, targets, ignore_index=-1):
-        predictions = predictions.view(-1, predictions.size(-1))
-        targets = targets.view(-1)
-        
-        return F.cross_entropy(
-            predictions, 
-            targets, 
-            ignore_index=ignore_index,
-        )
-
 class Transformer(BaseModel):
     """
     Decoder-only Transformer model for sequence tasks.
@@ -67,27 +50,24 @@ class Transformer(BaseModel):
                 torch.nn.init.zeros_(module.bias)
                 torch.nn.init.ones_(module.weight)
 
-    def forward(self, x, targets = None):
+    def forward(self, x):
         batch_size, seq_len = x.size()
+        assert seq_len <= self.max_seq_len, f"Sequence length {seq_len} exceeds max_seq_len {self.max_seq_len}"
         
-        positions = torch.arange(0, seq_len, device=x.device).unsqueeze(0) # Shape: (1, seq_len)
+        positions = torch.arange(0, seq_len, device=x.device, dtype=torch.long).unsqueeze(0)
         
         token_emb = self.token_embedding(x)
         pos_emb = self.position_embedding(positions)
         x = self.dropout(token_emb + pos_emb)
 
-        causal_mask = torch.triu(torch.ones(seq_len, seq_len, device=x.device), diagonal=1).bool()
+        causal_mask = torch.triu(torch.ones(seq_len, seq_len, device=x.device, dtype=torch.bool), diagonal=1)
 
         x = self.transformer(x, mask=causal_mask, is_causal=True)
         x = self.layernorm(x)
 
         logits = self.fc(x)
         
-        loss = None
-        if targets is not None:
-            loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1)
-
-        return logits, loss
+        return logits
     
     def generate(self, x, max_length=20, temperature=1.0):
         """
@@ -98,7 +78,7 @@ class Transformer(BaseModel):
             temperature: sampling temperature 
         """
         for _ in range(max_length):
-            logits, _ = self(x)
+            logits = self(x)
             logits = logits[:, -1, :] / temperature  
             probs = torch.softmax(logits, dim=-1)
             _, next_token = torch.topk(probs, k=1, dim=-1)

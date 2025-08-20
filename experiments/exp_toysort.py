@@ -8,6 +8,22 @@ from argparse import ArgumentParser
 import os
 from experiments.exp_base import BaseExperiment
 
+class CustomCrossEntropyLoss(nn.Module):
+    """
+    Custom cross entropy loss for transformer model with support for ignore_index.
+    """
+    def __init__(self, ):
+        super().__init__()
+    
+    def forward(self, predictions, targets, ignore_index=-1):
+        predictions = predictions.view(-1, predictions.size(-1))
+        targets = targets.view(-1)
+        
+        return F.cross_entropy(
+            predictions, 
+            targets, 
+            ignore_index=ignore_index,
+        )
 
 class ToySortExperiment(BaseExperiment):
     """
@@ -55,9 +71,9 @@ class ToySortExperiment(BaseExperiment):
 
             self.optimizer.zero_grad(set_to_none=True)
 
-            logits, loss = self.model(x, y)
-
-
+            logits = self.model(x)
+            
+            loss = self.criterion(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-1)
            
             loss.backward()
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
@@ -86,14 +102,10 @@ class ToySortExperiment(BaseExperiment):
                 inp = x[:, : self.sequence_length]
                 target_sol = y[:, -self.sequence_length :]
 
-                generated_full = self.model.generate(
-                    inp, max_length=self.sequence_length
-                )
-
+                generated_full = self.model.generate(inp, max_length=self.sequence_length)
                 generated_sol = generated_full[:, self.sequence_length:]
 
                 correct = (generated_sol == target_sol).all(dim=-1)
-
                 total_correct += correct.sum().item()
                 total_sequences += generated_sol.size(0)
 
@@ -112,3 +124,16 @@ class ToySortExperiment(BaseExperiment):
         )
 
         return None, metrics
+
+    @staticmethod
+    def inference(model, **kwargs):
+        super().inference(model, **kwargs)
+        
+        input = torch.randint(0, model.num_digits, (1, model.sequence_length), dtype=torch.long)
+        
+        with torch.no_grad():
+            generated = model.generate(input.to(model.device), max_length=model.max_seq_len).cpu().numpy()
+            
+        print("Input Sequence:", input)
+        print("Generated Sequence:", generated)    
+            

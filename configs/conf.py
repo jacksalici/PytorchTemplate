@@ -4,6 +4,7 @@ from dataclasses import dataclass, field, fields
 from typing import Any, Dict, Optional, Self, List, Literal
 from pathlib import Path
 import torch
+import os
 
 def str2bool(v):
     """Convert string representation of truth to boolean."""
@@ -22,6 +23,8 @@ def get_default_run_name() -> str:
     from datetime import datetime
     now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     return Path(__file__).parent.parent.name + f"_{now}"
+
+
 
 
 @dataclass
@@ -179,5 +182,16 @@ class Config:
                 return "mps"
         
         return "cpu"
-        
+    
+    def get_checkpoint_path(self) -> str:
+        """Get the path to the config directory."""
+        if not os.path.exists(self.conf["checkpoint_path"]):
+            os.makedirs(self.conf["checkpoint_path"])
+                
+        if "checkpoint_name" in self.conf:
+            path = os.path.join(self.conf["checkpoint_path"], self.conf["checkpoint_name"])
+        else:
+            path = f"{str(os.path.join(self.conf["checkpoint_path"], self.conf["model_name"]))}.pth"
+            
+        return path
     

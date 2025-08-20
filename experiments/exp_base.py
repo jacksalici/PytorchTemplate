@@ -2,7 +2,6 @@ import torch
 from torch import nn, optim, device
 from torch.utils.data import DataLoader
 from utils.logger import Logger
-from utils.plotter import plot
 from utils.metrics import Metrics
 import torch.nn.functional as F
 from argparse import ArgumentParser
@@ -94,7 +93,7 @@ class BaseExperiment():
             #    self.save_model(epoch, test_loss)
     
     
-    def save_model(self, epoch: int, test_loss: float):
+    def _save_model(self, epoch: int, test_loss: float):
         """
         Saves the model state to a file.
         Args:
@@ -103,13 +102,19 @@ class BaseExperiment():
         """
         if self.conf.save_model:
             print(f"Saving model at epoch {epoch} with test loss {test_loss}")
-            if not os.path.exists(self.conf["checkpoint_path"]):
-                os.makedirs(self.conf["checkpoint_path"])
-            
-            if "checkpoint_name" in self.conf:
-                path = os.path.join(self.conf["checkpoint_path"], self.conf["checkpoint_name"])
-            else:
-                path = f"{str(os.path.join(self.conf["checkpoint_path"], self.conf["model_name"]))}.pth"
-            torch.save(self.model, path)
+            torch.save(self.model, self.conf.get_checkpoint_path())
 
 
+    @staticmethod
+    def inference(model: nn.Module, **kwargs):
+        """
+        Perform inference using the provided model.
+        Args:
+            model (nn.Module): The model to be used for inference.
+            **kwargs: Additional keyword arguments for the inference process.
+        
+        Returns:
+            Any: The result of the inference process.
+        """
+        model.eval()
+        return None
