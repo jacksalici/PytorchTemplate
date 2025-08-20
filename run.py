@@ -48,7 +48,7 @@ def main():
                 batch_size=config.batch_size, 
                 num_workers=4,
                 pin_memory=(device == "cuda"),  # Only pin memory for CUDA
-                length=config.sequence_length,
+                length=config.seq_len,
                 num_digits=config.num_digits,
             )
         
@@ -73,21 +73,26 @@ def main():
             raise ValueError(f"Unknown optimizer: {config.optim}")
         
         if config.experiment in experiments:
-            experiment = experiments[config.experiment]["experiment"](model, criterion, optimizer, device, logger, config.to_dict())
+            experiment = experiments[config.experiment]["experiment"](model, criterion, optimizer, device, logger, config)
             experiment.run(train_loader, test_loader, num_epochs=config.num_epochs)
         else:
             raise ValueError(f"experiment {config.experiment} not available - please implement the experiment classes")
 
-    elif config.task == "inf":
+    elif config.task == "inference":
+        print(f"Running inference for {config.experiment} on {config.model_name} model...")
         model = torch.load(
             config.get_checkpoint_path(), map_location=device, weights_only=False
         )
+        print(f"Loaded model from {config.get_checkpoint_path()}.")
 
         if config.experiment in experiments:
-            experiments[config.experiment]["experiment"].inference(model, **config.to_dict())
+            exp = experiments[config.experiment]["experiment"]
+            exp.inference(model, config)
         else:
             raise ValueError(f"Unknown experiment: {config.experiment}")
 
+    else:
+        raise ValueError(f"Unknown task: {config.task}")
         
         
 if __name__ == "__main__":

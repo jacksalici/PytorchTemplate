@@ -12,7 +12,7 @@ class MetricResults:
     auroc: float = 0.0
     auprc: float = 0.0 
     
-    def measure(self, scores, pred_labels, labels, adjust=False, avoid_curves = False, avoid_thresholds = False):       
+    def measure(self, scores, pred_labels, labels, avoid_curves = False, avoid_thresholds = False):       
         if not avoid_thresholds:
             self.accuracy = binary_accuracy(pred_labels, labels)
             self.precision = binary_precision(pred_labels, labels)

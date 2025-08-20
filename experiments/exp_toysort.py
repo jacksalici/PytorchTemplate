@@ -2,11 +2,10 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
 from utils.logger import Logger
-from utils.metrics import Metrics
 import torch.nn.functional as F
 from argparse import ArgumentParser
-import os
 from experiments.exp_base import BaseExperiment
+from configs.conf import Config
 
 class CustomCrossEntropyLoss(nn.Module):
     """
@@ -16,9 +15,7 @@ class CustomCrossEntropyLoss(nn.Module):
         super().__init__()
     
     def forward(self, predictions, targets, ignore_index=-1):
-        predictions = predictions.view(-1, predictions.size(-1))
-        targets = targets.view(-1)
-        
+              
         return F.cross_entropy(
             predictions, 
             targets, 
@@ -30,19 +27,6 @@ class ToySortExperiment(BaseExperiment):
     Experiment class for the toy sorting task.
     Handles sequence-to-sequence learning where the model learns to sort sequences.
     """
-
-    @staticmethod
-    def add_args(parser: ArgumentParser):
-        """Add toy sort specific arguments."""
-        parser = BaseExperiment.add_args(parser)
-        parser.add_argument(
-            "--sequence_length", type=int, default=6, help="Length of sequences to sort"
-        )
-        parser.add_argument(
-            "--num_digits", type=int, default=3, help="Number of possible digits"
-        )
-        return parser
-
     def __init__(
         self,
         model: nn.Module,
@@ -50,7 +34,7 @@ class ToySortExperiment(BaseExperiment):
         optimizer: optim.Optimizer,
         device: torch.device,
         logger: Logger,
-        conf: dict,
+        conf: Config,
     ):
         super().__init__(model, criterion, optimizer, device, logger, conf)
         self.sequence_length = conf.get("sequence_length", 6)
@@ -61,12 +45,10 @@ class ToySortExperiment(BaseExperiment):
         self.model.train()
         self.model.requires_grad_(True)
         total_loss = 0.0
-        num_batches = 0
+        
 
         for batch_idx, (x, y) in enumerate(train_loader):
-           
-
-            print(f"Batch {batch_idx + 1}/{len(train_loader)}", end="\r")
+            print(f"Train Batch {batch_idx + 1}/{len(train_loader)}", end="\r")
             x, y = x.to(self.device), y.to(self.device)
 
             self.optimizer.zero_grad(set_to_none=True)
@@ -80,19 +62,15 @@ class ToySortExperiment(BaseExperiment):
             self.optimizer.step()
 
             total_loss += loss.item()
-            num_batches += 1
 
-        print(f"Training Loss: {loss:.4f}")
-        return loss
+        return total_loss / len(train_loader)
 
     def validate(self, val_loader: DataLoader) -> tuple[float, dict]:
 
         self.model.eval()
-        total_loss = 0.0
         total_correct = 0
         total_sequences = 0
-        num_batches = 0
-
+        
         with torch.no_grad():
             for batch_idx, (x, y) in enumerate(val_loader):
                 print(f"Eval Batch {batch_idx + 1}/{len(val_loader)}", end="\r")
@@ -104,36 +82,27 @@ class ToySortExperiment(BaseExperiment):
 
                 generated_full = self.model.generate(inp, max_length=self.sequence_length)
                 generated_sol = generated_full[:, self.sequence_length:]
-
+                
+                
                 correct = (generated_sol == target_sol).all(dim=-1)
                 total_correct += correct.sum().item()
                 total_sequences += generated_sol.size(0)
-
-        accuracy = (
-            total_correct / max(total_sequences, 1) if total_sequences > 0 else 0.0
-        )
-
-        metrics = {
-            "Validation Accuracy": accuracy,
+                
+                        
+        return 0, {
+            "Accuracy": total_correct / total_sequences,
             "Correct Sequences": total_correct,
             "Total Sequences": total_sequences,
         }
 
-        print(
-            f"Validation Accuracy: {accuracy:.4f} ({total_correct}/{total_sequences})"
-        )
-
-        return None, metrics
-
     @staticmethod
-    def inference(model, **kwargs):
-        super().inference(model, **kwargs)
-        
-        input = torch.randint(0, model.num_digits, (1, model.sequence_length), dtype=torch.long)
-        
+    def inference(model: nn.Module, config: Config):
+        input = torch.randint(0, model.num_digits, (1, 6), dtype=torch.long)
+        model.eval()
         with torch.no_grad():
-            generated = model.generate(input.to(model.device), max_length=model.max_seq_len).cpu().numpy()
             
-        print("Input Sequence:", input)
-        print("Generated Sequence:", generated)    
+            generated = model.generate(input, max_length=6)
+            
+        print("Input Sequence:", input.tolist()[0])
+        print("Generated Sequence:", generated.tolist()[0][6:])    
             

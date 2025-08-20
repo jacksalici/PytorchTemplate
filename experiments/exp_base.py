@@ -2,23 +2,12 @@ import torch
 from torch import nn, optim, device
 from torch.utils.data import DataLoader
 from utils.logger import Logger
-from utils.metrics import Metrics
 import torch.nn.functional as F
 from argparse import ArgumentParser
+from configs.conf import Config
 import os
 
 class BaseExperiment():
-    @staticmethod
-    def add_args(parser: ArgumentParser):
-        """
-        Adds command-line arguments to the given ArgumentParser instance.
-        This function is intended to be used for extending the parser with experiment-specific arguments.
-        Args:
-            parser (ArgumentParser): The argument parser to which new arguments will be added.
-        """
-        
-        return parser
-
     def __init__(
         self,
         model: nn.Module,
@@ -26,7 +15,7 @@ class BaseExperiment():
         optimizer: optim.Optimizer,
         device: torch.device,
         logger: Logger,
-        conf: dict
+        conf: Config
     ):
         """
         Initializes the BaseExperiment class with the provided model, criterion, optimizer, device, logger, and arguments.
@@ -44,6 +33,7 @@ class BaseExperiment():
         self.device = device
         self.logger = logger
         self.conf = conf
+        self.min_metric_model = float("inf") # The minimum metric value for model saving
         
     def train(self, train_loader: DataLoader) -> float:
         """
@@ -69,8 +59,8 @@ class BaseExperiment():
         """
         
         return 0, {}
-    
-    def run(self, train_loader: DataLoader, val_loader: DataLoader, num_epochs: int):
+        
+    def run(self, train_loader: DataLoader, val_loader: DataLoader, num_epochs: int, model_saving_metric: str = "Test Loss"):
         """
         Runs the training and testing loop for the specified number of epochs.
         Args:
@@ -78,40 +68,45 @@ class BaseExperiment():
             val_loader (DataLoader): DataLoader for the testing dataset.
             num_epochs (int): Number of epochs to run the training and testing loop.
         """
-        min_test_loss = float("inf")
+        
         
         for epoch in range(num_epochs):
-            print(f"Epoch {epoch + 1}/{num_epochs}")
             train_loss = self.train(train_loader)
             test_loss, metric = self.validate(val_loader)
             
-            #self.logger.log({"Epoch": epoch, "Train Loss": train_loss, "Test Loss": test_loss,
-            #               **metric.get_dict()})
+            log_dict = {"Epoch": epoch, "Train Loss": train_loss, "Test Loss": test_loss,
+                           **metric}
+            self.logger.log(log_dict)
                      
-            #if test_loss < min_test_loss:
-            #    min_test_loss = test_loss
-            #    self.save_model(epoch, test_loss)
+   
+            self._save_model(epoch, log_dict, model_saving_metric)
     
     
-    def _save_model(self, epoch: int, test_loss: float):
+    def _save_model(self, epoch: int, log_dict: dict, model_saving_metric: str):
         """
         Saves the model state to a file.
         Args:
             epoch (int): The current epoch number.
             test_loss (float): The test loss at the current epoch.
         """
-        if self.conf.save_model:
-            print(f"Saving model at epoch {epoch} with test loss {test_loss}")
-            torch.save(self.model, self.conf.get_checkpoint_path())
+        if model_saving_metric not in log_dict:
+            raise Warning(f"Model saving metric '{model_saving_metric}' not found in log_dict")
+        metric_value = log_dict[model_saving_metric]
+        
+        if metric_value <= self.min_metric_model:
+            self.min_metric_model = metric_value
+            if self.conf.save_model:
+                print(f"Saving model at epoch {epoch} with {model_saving_metric} {metric_value}")
+                torch.save(self.model, self.conf.get_checkpoint_path())
 
 
     @staticmethod
-    def inference(model: nn.Module, **kwargs):
+    def inference(model: nn.Module, config: Config):
         """
         Perform inference using the provided model.
         Args:
             model (nn.Module): The model to be used for inference.
-            **kwargs: Additional keyword arguments for the inference process.
+            config (Config): Configuration object containing inference settings.
         
         Returns:
             Any: The result of the inference process.
