@@ -1,6 +1,6 @@
 # Pytorch Template 🔧
 
-![Open Issues](https://img.shields.io/github/issues/jacksalici/PytorchTemplate) ![GitHub Repo stars](https://img.shields.io/github/stars/jacksalici/PytorchTemplate?style=flat)![Static Badge](https://img.shields.io/badge/made_with-pizza_and_coffee-lightgray) ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white&style=flat) [![Licence](https://img.shields.io/github/license/jacksalici/PyTorchTemplate?style=for-the-badge&style=flat)](./LICENSE)
+![Open Issues](https://img.shields.io/github/issues/jacksalici/PytorchTemplate) ![GitHub Repo stars](https://img.shields.io/github/stars/jacksalici/PytorchTemplate?style=flat) ![Static Badge](https://img.shields.io/badge/made_with-pizza_and_coffee-lightgray) ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white&style=flat) [![Licence](https://img.shields.io/github/license/jacksalici/PyTorchTemplate?style=for-the-badge&style=flat)](./LICENSE)
 
 
 
