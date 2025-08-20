@@ -9,14 +9,11 @@ class Transformer(BaseModel):
     Decoder-only Transformer model for sequence tasks.
     """
     
-    def __init__(self, input_dim=1, num_digits = 3, embed_dim=128, max_seq_len=5000,
-                 num_heads=8, ff_dim=2048, dropout_rate=0.1,
-                 attention_dropout=0.1, transformer_num_layers=6, **kwargs):
+    def __init__(self, num_digits = 3, embed_dim=128, max_seq_len=5000,
+                 num_heads=8, dropout_rate=0.1, transformer_num_layers=6, **kwargs):
         super().__init__(**kwargs)
         
-        # Use embed_dim as the model dimension
         self.num_digits = num_digits
-        dropout = dropout_rate
         
         self.token_embedding = nn.Embedding(num_digits, embed_dim)
         self.position_embedding = nn.Embedding(max_seq_len, embed_dim)
@@ -24,12 +21,12 @@ class Transformer(BaseModel):
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=embed_dim, 
             nhead=num_heads,
-            dim_feedforward=ff_dim,
-            dropout=dropout,
+            dim_feedforward=embed_dim * 2,
+            dropout=dropout_rate,
             activation='gelu',
-            batch_first=True
+            batch_first=True,
         )
-        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=transformer_num_layers)
+        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=transformer_num_layers, enable_nested_tensor=False)
         
         self.fc = nn.Linear(embed_dim, num_digits)  # Output should match num_digits, not input_dim
         self.max_seq_len = max_seq_len

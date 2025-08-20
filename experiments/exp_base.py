@@ -25,7 +25,7 @@ class BaseExperiment():
             optimizer (optim.Optimizer): The optimizer to be used for training.
             device (torch.device): The device (CPU or GPU) on which the model will be trained.
             logger (Logger): Logger instance for logging experiment results.
-            conf (dict): Dictionary of arguments for the experiment.
+            conf (Config): Configuration class
         """
         self.model = model
         self.criterion = criterion
@@ -111,5 +111,4 @@ class BaseExperiment():
         Returns:
             Any: The result of the inference process.
         """
-        model.eval()
-        return None
+        pass

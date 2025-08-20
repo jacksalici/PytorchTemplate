@@ -1,7 +1,6 @@
 import wandb
 import json
 
-
 class Logger:
     def __init__(self, project_name, avoid_wandb, print_debug = False, name=None):
         self.print_debug = print_debug

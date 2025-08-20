@@ -1,6 +1,6 @@
 import yaml
 import argparse
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field, fields, MISSING
 from typing import Any, Dict, Optional, Self, List, Literal
 from pathlib import Path
 import torch
@@ -23,9 +23,6 @@ def get_default_run_name() -> str:
     from datetime import datetime
     now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     return Path(__file__).parent.parent.name + f"_{now}"
-
-
-
 
 @dataclass
 class Config:
@@ -59,20 +56,12 @@ class Config:
     
     # Transformer specific settings
     num_heads: int = 8
-    ff_dim: int = 2048
-    max_seq_len: int = 5000
     attention_dropout: float = 0.1
     transformer_num_layers: int = 6
     
     # Experiment and data settings
     experiment: str = ""
     dataloader: str = ""
-    
-    
-    # Toy sorting specific settings
-    sequence_length: int = 6
-    num_digits: int = 1
-    
 
     # Optimizer settings
     optim: str = "adam"
@@ -84,88 +73,111 @@ class Config:
     checkpoint_name: Optional[str] = None
     
     # Config file settings
-    config: str = "default.yaml"
+    config: List[str] = field(default_factory=lambda: ["default.yaml"])
     config_path: str = "configs"
     run_name: str = get_default_run_name()
     task: Literal["training", "inference"] = "training"
 
     @classmethod
-    def _from_yaml(cls, yaml_path: str) -> Self:
-        """Load configuration from a YAML file."""
-        if not Path(yaml_path).exists():
-            raise FileNotFoundError(f"Config file not found: {yaml_path}")
+    def _from_yamls(cls, yaml_paths: List[str]) -> Dict[str, Any]:
+        """Load configuration from a list of YAML files and return as dict (later files override earlier ones)."""
             
-        with open(yaml_path, 'r') as f:
-            yaml_data = yaml.safe_load(f) or {}
+        merged_config = {}
         
-        # Filter only valid fields
-        valid_fields = {f.name for f in fields(cls)}
-        filtered_data = {k: v for k, v in yaml_data.items() if k in valid_fields}
+        for config_file in yaml_paths:            
+            try:
+                with open(config_file, 'r') as f:
+                    yaml_data = yaml.safe_load(f) or {}
+                    merged_config.update(yaml_data)
+            except FileNotFoundError:
+                print(f"Warning: Config file not found: {config_file}")
         
-        return cls(**filtered_data)
+        return merged_config
     
     @classmethod
     def from_args(cls, override_args: Optional[Dict[str, Any]] = None) -> Self:
-        """Create configuration with CLI argument overrides."""
+        """Create configuration with CLI argument overrides and support for multiple config files."""
         # Default argument parser
         parser = argparse.ArgumentParser(description="PyTorch Template")
-        parser.add_argument("--config", type=str, default="default.yaml", help="Path to config YAML file")
+        parser.add_argument("--config", type=str, nargs='+', default=["default.yaml"], help="Paths to one or more config YAML files")
         parser.add_argument("--config_path", type=str, default="configs", help="Directory containing config files")
         parser.add_argument("--run_name", type=str, default=get_default_run_name(), help="Experiment name")
         
-        for f in fields(cls):
-            if f.name in ['config', 'config_path', 'run_name']:
-                continue  # Already added above
-                
-            if f.type == bool:
-                parser.add_argument(f"--{f.name}", type=lambda x: x.lower() in ['true', '1', 'yes'], 
-                                  default=argparse.SUPPRESS, help=f"Override {f.name}")
-            elif f.type == int:
-                parser.add_argument(f"--{f.name}", type=int, default=argparse.SUPPRESS, help=f"Override {f.name}")
-            elif f.type == float:
-                parser.add_argument(f"--{f.name}", type=float, default=argparse.SUPPRESS, help=f"Override {f.name}")
-            elif f.type == str or f.type == Optional[str]:
-                parser.add_argument(f"--{f.name}", type=str, default=argparse.SUPPRESS, help=f"Override {f.name}")
-            elif f.type == Optional[List[int]] or f.type == List[int]:
-                parser.add_argument(f"--{f.name}", nargs='+', type=int, default=argparse.SUPPRESS, help=f"Override {f.name}")
-            elif f.type == Optional[List[float]] or f.type == List[float]:
-                parser.add_argument(f"--{f.name}", nargs='+', type=float, default=argparse.SUPPRESS, help=f"Override {f.name}")
-            elif f.type == Optional[list] or f.type == list:
-                parser.add_argument(f"--{f.name}", nargs='+', default=argparse.SUPPRESS, help=f"Override {f.name}")
-            elif hasattr(f.type, '__origin__') and f.type.__origin__ is Literal or \
-                      hasattr(f.type, '__args__') and len(f.type.__args__) > 0 and hasattr(f.type.__args__[0], '__origin__') and f.type.__args__[0].__origin__ is Literal:
-                # Handle Literal types and Optional[Literal]
-                literal_type = f.type if f.type.__origin__ is Literal else f.type.__args__[0]
-                parser.add_argument(f"--{f.name}", type=str, default=argparse.SUPPRESS, choices=list(literal_type.__args__), help=f"Override {f.name}")
-                 
+        args, remaining_args = parser.parse_known_args()
+        
+        merged_config = {}
+        
+        # 1. Parse known args first to get config files and then load them
+        if args.config:
+            merged_config = cls._from_yamls([Path(args.config_path) / config_file for config_file in args.config])
+        
+        merged_config['config'] = args.config
+        merged_config['config_path'] = args.config_path  
+        merged_config['run_name'] = args.run_name
+        
+        # 2.  Now add CLI arguments for all known fields plus any extra fields from YAML
+        all_field_names = {f.name: f.type for f in fields(cls)} | { key: type(v) for key, v in merged_config.items() }
+        
+        for field_name, field_type in all_field_names.items():
+            if field_name in ['config', 'config_path', 'run_name']:
+                continue  
+            
+            if field_type:
+                # Use existing field type logic
+                if field_type == bool:
+                    parser.add_argument(f"--{field_name}", type=lambda x: x.lower() in ['true', '1', 'yes'], 
+                                      default=argparse.SUPPRESS, help=f"Override {field_name}")
+                elif field_type == int:
+                    parser.add_argument(f"--{field_name}", type=int, default=argparse.SUPPRESS, help=f"Override {field_name}")
+                elif field_type == float:
+                    parser.add_argument(f"--{field_name}", type=float, default=argparse.SUPPRESS, help=f"Override {field_name}")
+                elif field_type == str or field_type == Optional[str]:
+                    parser.add_argument(f"--{field_name}", type=str, default=argparse.SUPPRESS, help=f"Override {field_name}")
+                elif field_type == Optional[List[int]] or field_type == List[int]:
+                    parser.add_argument(f"--{field_name}", nargs='+', type=int, default=argparse.SUPPRESS, help=f"Override {field_name}")
+                elif field_type == Optional[List[float]] or field_type == List[float]:
+                    parser.add_argument(f"--{field_name}", nargs='+', type=float, default=argparse.SUPPRESS, help=f"Override {field_name}")
+                elif field_type == Optional[list] or field_type == list:
+                    parser.add_argument(f"--{field_name}", nargs='+', default=argparse.SUPPRESS, help=f"Override {field_name}")
+                elif hasattr(field_type, '__origin__') and field_type.__origin__ is Literal or \
+                          hasattr(field_type, '__args__') and len(field_type.__args__) > 0 and hasattr(field_type.__args__[0], '__origin__') and field_type.__args__[0].__origin__ is Literal:
+                    # Handle Literal types and Optional[Literal]
+                    literal_type = field_type if field_type.__origin__ is Literal else field_type.__args__[0]
+                    parser.add_argument(f"--{field_name}", type=str, default=argparse.SUPPRESS, choices=list(literal_type.__args__), help=f"Override {field_name}")
+            else:
+                # If no type is specified, treat it as a string
+                parser.add_argument(f"--{field_name}", type=str, default=argparse.SUPPRESS, help=f"Override {field_name}")
+        
         args = parser.parse_args()
         
-        # Start with default config
-        config = cls()
+        # Override default values with merged YAML config
+        known_fields = {f.name: f.default if f.default is not MISSING else None for f in fields(cls)}
         
-        # Load from YAML if specified
-        if args.config:
-            config_file = Path(args.config_path) / args.config
-            config = cls._from_yaml(str(config_file))
+        config_dict = known_fields.copy()
+        config_dict.update(merged_config)
         
-        # Override with CLI arguments
         cli_overrides = {k: v for k, v in vars(args).items() 
                         if k not in ['config', 'config_path'] and hasattr(args, k)}
-        
-        for key, value in cli_overrides.items():
-            if hasattr(config, key):
-                setattr(config, key, value)
+        config_dict.update(cli_overrides)
         
         if override_args:
-            for key, value in override_args.items():
-                if hasattr(config, key):
-                    setattr(config, key, value)
+            # Apply additional override args if provided
+            config_dict.update(override_args)
         
-        return config
+        # Create instance with known fields only and add extra fields as attributes
+        known_config_dict = {k: v for k, v in config_dict.items() if k in known_fields}
+        instance = cls(**known_config_dict)
+        
+        for key, value in config_dict.items():
+            if key not in known_fields:
+                setattr(instance, key, value)
+        
+        return instance
     
     def to_dict(self) -> Dict[str, Any]:
-        """Convert config to dictionary."""
+        """Convert config to dictionary"""
         return {f.name: getattr(self, f.name) for f in fields(self)}
+        
     
     def save_yaml(self, path: str):
         """Save configuration to YAML file."""
@@ -183,15 +195,20 @@ class Config:
         
         return "cpu"
     
+    def get(self, key: str, default: Any = None) -> Any:
+        """Get a configuration value with a default. Actually a fallback when using the config as a dict."""
+        return getattr(self, key, default)
+    
+    
     def get_checkpoint_path(self) -> str:
         """Get the path to the config directory."""
-        if not os.path.exists(self.conf["checkpoint_path"]):
-            os.makedirs(self.conf["checkpoint_path"])
+        if not os.path.exists(self.checkpoint_path):
+            os.makedirs(self.checkpoint_path)
                 
-        if "checkpoint_name" in self.conf:
-            path = os.path.join(self.conf["checkpoint_path"], self.conf["checkpoint_name"])
+        if self.checkpoint_name is not None:
+            path = os.path.join(self.checkpoint_path, self.checkpoint_name)
         else:
-            path = f"{str(os.path.join(self.conf["checkpoint_path"], self.conf["model_name"]))}.pth"
+            path = f"{str(os.path.join(self.checkpoint_path, self.model_name))}.pth"
             
         return path
     

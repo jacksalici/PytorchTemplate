@@ -1,34 +1,12 @@
 
 # General settings
-seed: 42
 force_reproducibility: true
-device: "auto"
+device: "cpu"
 
 # Training settings
 lr: 0.0005  
 batch_size: 64  
 num_epochs: 5
-
-# Model settings
-model_name: "transformer"
-input_dim: 3 
-embed_dim: 128
-seq_len: 11  
-
-# Transformer specific settings
-num_heads: 2 
-transformer_num_layers: 2  
-ff_dim: 96 
-dropout_rate: 0.1  
-attention_dropout: 0.1
-
-# Task settings
-experiment: "toysort"
-dataloader: "toysort_ds"
-
-# Task specific settings
-sequence_length: 6
-num_digits: 3
 
 # Optimizer settings
 optim: "adamw"
@@ -36,4 +14,3 @@ optim: "adamw"
 # Logging and saving
 avoid_wandb: true
 save_model: true
-checkpoint_path: "checkpoints"

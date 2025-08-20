@@ -1,0 +1,21 @@
+
+# Model settings
+model_name: "transformer"
+embed_dim: 32
+
+# Transformer specific settings
+num_heads: 1
+transformer_num_layers: 2  
+dropout_rate: 0.1  
+
+# Task settings
+experiment: "toysort"
+dataloader: "toysort_ds"
+
+# Task specific settings
+seq_len: 6
+num_digits: 3
+
+# Optimizer settings
+optim: "adamw"
+
