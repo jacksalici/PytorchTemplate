@@ -5,7 +5,7 @@ from utils.logger import Logger
 import torch.nn.functional as F
 from argparse import ArgumentParser
 from experiments.exp_base import BaseExperiment
-from configs.conf import Config
+from configs.config import Config
 
 class CustomCrossEntropyLoss(nn.Module):
     """

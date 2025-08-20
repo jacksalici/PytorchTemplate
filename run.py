@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.optim as optim
 from utils.logger import Logger
 from utils.deterministic import set_seed
-from configs.conf import Config
+from configs.config import Config
 
 from pathlib import Path
 

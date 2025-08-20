@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 from utils.logger import Logger
 import torch.nn.functional as F
 from argparse import ArgumentParser
-from configs.conf import Config
+from configs.config import Config
 import os
 
 class BaseExperiment():
