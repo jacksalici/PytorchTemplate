@@ -1,82 +1,76 @@
-# Pytorch Template
-> A custom template for scalable PyTorch projects with flexible configuration management.
+# Pytorch Template 🔧
+> A custom template for scalable PyTorch projects with flexible configuration management. Designed to be ready in minimal time while remaining maintainable and scalable. ♻️ 
 
-## Installation
+## Template Structure 📂
+```bash
+PytorchTemplate/
+├── readme.md  👈 You are here
+├── requirements.txt             
+├── run.py 
+├── configs/ 
+│   ├── config.py             
+│   └── default.yaml
+│    ...
+├── dataloaders/ 
+│   └── ...                      
+├── experiments/ 
+│   ├── exp_base.py              
+│   └── ...
+├── models/                      
+│   ├── base.py                  
+│   ...
+└── utils/                       
+	├── ...                      
+```
 
-1. Clone the repository or make it from this template
+- **`run.py`**: Main entry point that handles configuration loading and experiment execution.
+- **`configs/`**: The _certainly_not_over_engineered_ configuration system (read below for more details).
+- **`experiments/`**: Modular experiment classes that define training/inference logic. For larger projects, you may want a file for each experiment, such as forecasting, classification, etc.
+- **`models/`**: PyTorch model implementations with a common base class that inherits all methods from `torch.nn.Module`.
+- **`dataloaders/`**: Data loading and preprocessing modules.
+- **`utils/`**: Shared utilities for logging, metrics, plotting, and reproducibility.
+
+## Installation 🧨
+
+1. Clone the repository or create it from this template:
 	```bash
 	git clone <your-repo-url>
 	cd <your-repo-name>
 	```
 2. Install dependencies:
 	```bash
-    python -m venv .venv
-	pip install -r requirements.txt
+	python3 -m venv .venv
+	pip3 install -r requirements.txt
 	```
 
-## Usage
+## Training and Inference 🚀
 
-### Training with Configuration Files
+> The template comes with a simple experiment inspired by the [MinGPT Demo](https://github.com/karpathy/minGPT/blob/master/demo.ipynb). From a sequence of 6 numbers, the transformer model should learn to sort them in ascending order. 
+> Input: 0 0 2 1 0 1 -> Output: 0 0 0 1 1 2
 
-To train a model using a configuration file:
+To train the model, run:
 
 ```bash
-python run.py --config example.yaml
+python run.py --config default.yaml toySorter.yaml --task training
 ```
 
-### Command Line Arguments
-
-You can override any configuration parameter via command line:
+The models will be trained in a minute or two, and the accuracy should reach 100%.
+To infer from the model, run:
 
 ```bash
-python run.py --config example.yaml --lr 0.01 --batch_size 64 --num_epochs 100
+python run.py --config default.yaml toySorter.yaml --task inference
 ```
 
-### Running without Config File
+## Configuration 🔧
 
-You can run with default settings and override specific parameters:
+Configuration is handled by the `configs/config.py` file, which provides:
+- Default values for all parameters.
+- YAML configuration file loading.
+- Command-line argument overrides.
 
-```bash
-python run.py --model_name mlp --lr 0.001 --num_epochs 50
-```
+This means that the configuration priority is (from highest to lowest): (1) command-line arguments, (2) YAML configuration file values, and (3) default values in the `Config` class.
 
-## Configuration
+## Notes 📝
+The template is developed as my personal starting point for new PyTorch projects. There is a trade-off when developing this type of template: the goal is to write the maximum amount of [reusable code to save time](https://imgs.xkcd.com/comics/code_lifespan.png) in the future while avoiding to add complexity and knowledge overhead. I _hope_ this strikes the right balance. It should be easy to understand and extend, while also providing a solid foundation for scalable projects.
 
-Configuration is handled by the `configs/conf.py` file which provides:
-- Default values for all parameters
-- YAML configuration file loading
-- Command line argument overrides
-- Type validation
-
-### Configuration Priority (highest to lowest)
-1. Command line arguments
-2. YAML configuration file values  
-3. Default values in `Config` class
-
-
-## Example Usage:
-
-```bash
-# Use MLP config
-python run.py --config example.yaml
-
-# Override parameters
-python run.py --config example.yaml --hidden_dims 256 128 64 --use_batch_norm false
-
-# Use transformer
-python run.py --config transformer.yaml --num_heads 12 --transformer_num_layers 8
-```
-
-> The Toy Sorter is a simple example inspired by the [MinGPT Demo](https://github.com/karpathy/minGPT/blob/master/demo.ipynb). From a sequence of 6 number the model should learn to sort them in ascending order.
-
-To evaluate a model, run:
-
-```bash
-python inf.py --config configs/toySorter.yaml
-``` 
-
-## Configuration
-- Place your config files in the `configs/` directory.
-- Edit `requirements.txt` to add/remove dependencies as needed.
-
-
+The template will be updated as I discover new features to add or encounter bugs. If you have any suggestions or issues, feel free to open an issue on the repository.
