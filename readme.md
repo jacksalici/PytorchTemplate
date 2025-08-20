@@ -1,4 +1,10 @@
 # Pytorch Template 🔧
+
+![Open Issues](https://img.shields.io/github/issues/jacksalici/PytorchTemplate) ![GitHub Repo stars](https://img.shields.io/github/stars/jacksalici/PytorchTemplate?style=flat)![Static Badge](https://img.shields.io/badge/made_with-pizza_and_coffee-lightgray) ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white&style=flat) [![Licence](https://img.shields.io/github/license/jacksalici/PyTorchTemplate?style=for-the-badge&style=flat)](./LICENSE)
+
+
+
+ 
 > A custom template for scalable PyTorch projects with flexible configuration management. Designed to be ready in minimal time while remaining maintainable and scalable. ♻️ 
 
 ## Template Structure 📂
@@ -74,3 +80,11 @@ This means that the configuration priority is (from highest to lowest): (1) comm
 The template is developed as my personal starting point for new PyTorch projects. There is a trade-off when developing this type of template: the goal is to write the maximum amount of [reusable code to save time](https://imgs.xkcd.com/comics/code_lifespan.png) in the future while avoiding to add complexity and knowledge overhead. I _hope_ this strikes the right balance. It should be easy to understand and extend, while also providing a solid foundation for scalable projects.
 
 The template will be updated as I discover new features to add or encounter bugs. If you have any suggestions or issues, feel free to open an issue on the repository.
+
+### Roadmap 🚧:
+- [ ] More baseline models and experiments.
+- [ ] Custom plotting utilities for better visualization.
+- [ ] Better logging and metrics tracking.
+- [ ] SLURM integration.
+
+ 
