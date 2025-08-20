@@ -1,0 +1,10 @@
+torch
+torcheval
+wandb
+matplotlib
+opencv-python
+tqdm
+einops
+pyyaml
+path
+numpy

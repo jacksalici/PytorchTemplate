@@ -1,0 +1,12 @@
+data
+wandb
+log
+checkpoints
+
+*.json
+*.png
+*.pkl
+
+__pycache__
+
+bash.sh
