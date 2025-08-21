@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from utils.logger import Logger
-from utils.deterministic import set_seed
+from utils.reproducibility import set_seeds
 from configs.config import Config
 
 from pathlib import Path
@@ -33,7 +33,7 @@ def main():
     
     device = config.get_device()
     
-    set_seed(config.seed, force=config.force_reproducibility)
+    set_seeds(config.seed, force=config.force_reproducibility)
         
     logger = Logger(
         project_name = config.project_name,

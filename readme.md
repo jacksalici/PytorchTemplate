@@ -34,7 +34,7 @@ PytorchTemplate/
 - **`experiments/`**: Modular experiment classes that define training/inference logic. For larger projects, you may want a file for each experiment, such as forecasting, classification, etc.
 - **`models/`**: PyTorch model implementations with a common base class that inherits all methods from `torch.nn.Module`.
 - **`dataloaders/`**: Data loading and preprocessing modules.
-- **`utils/`**: Shared utilities for logging, metrics, plotting, and reproducibility.
+- **`utils/`**: Shared utilities for logging, metrics, plotting, and reproducibility. **Wandb** is wrapped in the `logger
 
 ## Installation 🧨
 
