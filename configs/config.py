@@ -18,11 +18,9 @@ def str2bool(v):
         raise ValueError(f'Boolean value expected, got: {v}')
 
 
-def get_default_run_name() -> str:
+def get_default_project_name() -> str:
     """Get the name of the parent folder of the current file."""
-    from datetime import datetime
-    now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    return Path(__file__).parent.parent.name + f"_{now}"
+    return Path(__file__).parent.parent.name
 
 @dataclass
 class Config:
@@ -75,7 +73,7 @@ class Config:
     # Config file settings
     config: List[str] = field(default_factory=lambda: ["default.yaml"])
     config_path: str = "configs"
-    run_name: str = get_default_run_name()
+    project_name: str = get_default_project_name()
     task: Literal["training", "inference"] = "training"
 
     @classmethod
@@ -101,7 +99,7 @@ class Config:
         parser = argparse.ArgumentParser(description="PyTorch Template")
         parser.add_argument("--config", type=str, nargs='+', default=["default.yaml"], help="Paths to one or more config YAML files")
         parser.add_argument("--config_path", type=str, default="configs", help="Directory containing config files")
-        parser.add_argument("--run_name", type=str, default=get_default_run_name(), help="Experiment name")
+        parser.add_argument("--project_name", type=str, default=get_default_project_name(), help="Name or title of the project")
         
         args, remaining_args = parser.parse_known_args()
         
@@ -113,13 +111,13 @@ class Config:
         
         merged_config['config'] = args.config
         merged_config['config_path'] = args.config_path  
-        merged_config['run_name'] = args.run_name
+        merged_config['project_name'] = args.project_name
         
         # 2.  Now add CLI arguments for all known fields plus any extra fields from YAML
         all_field_names = {f.name: f.type for f in fields(cls)} | { key: type(v) for key, v in merged_config.items() }
         
         for field_name, field_type in all_field_names.items():
-            if field_name in ['config', 'config_path', 'run_name']:
+            if field_name in ['config', 'config_path', 'project_name']:
                 continue  
             
             if field_type:

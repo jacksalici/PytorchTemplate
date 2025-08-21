@@ -35,7 +35,9 @@ def main():
     
     set_seed(config.seed, force=config.force_reproducibility)
         
-    logger = Logger(config.run_name, config.avoid_wandb, False, config.run_name)
+    logger = Logger(
+        project_name = config.project_name,
+        avoid_wandb = config.avoid_wandb)
     
     if config.task == "training":
     

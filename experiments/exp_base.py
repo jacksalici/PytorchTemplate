@@ -103,7 +103,7 @@ class BaseExperiment():
     @staticmethod
     def inference(model: nn.Module, config: Config):
         """
-        Perform inference using the provided model.
+        Perform inference using the provided model. Static method since it does not require an instance of the class but it's useful to have it in the same class.
         Args:
             model (nn.Module): The model to be used for inference.
             config (Config): Configuration object containing inference settings.
