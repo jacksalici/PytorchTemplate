@@ -61,7 +61,7 @@ class Metrics():
         self._pred_labels = []
         self._labels = []
 
-    def update(self, scores = None, pred_labels = None, labels = None, adjust=False):
+    def update(self, scores = None, pred_labels = None, labels = None):
         if scores is not None:
             self._scores.append(scores)
         if pred_labels is not None:
@@ -75,7 +75,6 @@ class Metrics():
             scores = torch.cat(self._scores) if self._scores else None,
             pred_labels = torch.cat(self._pred_labels) if self._pred_labels else None,
             labels = torch.cat(self._labels) if self._labels else None,
-            adjust=False,
             avoid_curves=self.avoid_curves,
             avoid_thresholds=self.avoid_thresholds
         )        
@@ -91,6 +90,6 @@ if __name__ == "__main__":
 
     
     metrics = Metrics(avoid_curves=True)
-    metrics.update(scores, pred_labels, labels, adjust=False)
+    metrics.update(scores, pred_labels, labels)
     average_results = metrics.compute()
     print(average_results)
