@@ -29,7 +29,7 @@ class Logger:
     def __init__(
         self,
         project_name: str,
-        log_level=Literal["debug", "info", "warning", "error"],
+        log_level: Literal["debug", "info", "warning", "error"]="info",
         avoid_wandb: bool = True,
         remote_logger_run_name: str | None = None,
         separator: str = "|",
