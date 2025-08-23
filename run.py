@@ -67,7 +67,7 @@ def main():
         else:
             raise ValueError(f"Unknown model: {config.model_name}")
         
-        print(f"Model: {config.model_name}, Parameters: {model.n_param:,}")
+        logger(f"Model: {config.model_name}, Parameters: {model.n_param:,}")
         
         if config.optim in optimizers:
             optimizer = optimizers[config.optim](model.parameters(), lr=config.lr)
@@ -81,11 +81,11 @@ def main():
             raise ValueError(f"experiment {config.experiment} not available - please implement the experiment classes")
 
     elif config.task == "inference":
-        print(f"Running inference for {config.experiment} on {config.model_name} model...")
+        logger(f"Running inference for {config.experiment} on {config.model_name} model...")
         model = torch.load(
             config.get_checkpoint_path(), map_location=device, weights_only=False
         )
-        print(f"Loaded model from {config.get_checkpoint_path()}.")
+        logger(f"Loaded model from {config.get_checkpoint_path()}.")
 
         if config.experiment in experiments:
             exp = experiments[config.experiment]["experiment"]

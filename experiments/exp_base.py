@@ -76,7 +76,7 @@ class BaseExperiment():
             
             log_dict = {"Epoch": epoch, "Train Loss": train_loss, "Test Loss": test_loss,
                            **metric}
-            self.logger.log(log_dict)
+            self.logger(log_dict)
                      
    
             self._save_model(epoch, log_dict, model_saving_metric)
@@ -96,17 +96,18 @@ class BaseExperiment():
         if metric_value <= self.min_metric_model:
             self.min_metric_model = metric_value
             if self.conf.save_model:
-                print(f"Saving model at epoch {epoch} with {model_saving_metric} {metric_value}")
+                self.logger(f"Saving model at epoch {epoch} with {model_saving_metric} {metric_value}")
                 torch.save(self.model, self.conf.get_checkpoint_path())
 
 
     @staticmethod
-    def inference(model: nn.Module, config: Config):
+    def inference(model: nn.Module, config: Config, logger: Logger = None):
         """
         Perform inference using the provided model. Static method since it does not require an instance of the class but it's useful to have it in the same class.
         Args:
             model (nn.Module): The model to be used for inference.
             config (Config): Configuration object containing inference settings.
+            logger (Logger, optional): Logger instance for logging inference results. Defaults to None.
         
         Returns:
             Any: The result of the inference process.

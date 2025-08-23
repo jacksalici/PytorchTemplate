@@ -96,13 +96,16 @@ class ToySortExperiment(BaseExperiment):
         }
 
     @staticmethod
-    def inference(model: nn.Module, config: Config):
+    def inference(model: nn.Module, config: Config, logger: Logger = None):
         input = torch.randint(0, model.num_digits, (1, 6), dtype=torch.long)
         model.eval()
         with torch.no_grad():
             
             generated = model.generate(input, max_length=6)
             
-        print("Input Sequence:", input.tolist()[0])
-        print("Generated Sequence:", generated.tolist()[0][6:])    
+        if not logger:
+            logger = print # very pythonic :)
+        
+        logger("Input Sequence:", input.tolist()[0])
+        logger("Generated Sequence:", generated.tolist()[0][6:])    
             
