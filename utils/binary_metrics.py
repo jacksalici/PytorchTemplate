@@ -1,7 +1,7 @@
 from torcheval.metrics.functional import binary_auprc, binary_accuracy, binary_precision, binary_recall, binary_f1_score, binary_auroc
 from dataclasses import dataclass
 import torch
-from typing import List
+from typing import List, Dict
 
 @dataclass
 class MetricResults:
@@ -12,22 +12,22 @@ class MetricResults:
     auroc: float = 0.0
     auprc: float = 0.0 
     
-    def measure(self, scores: torch.Tensor, pred_labels: torch.Tensor, labels: torch.Tensor, avoid_curves: bool = False, avoid_thresholds: bool = False):
-        if not avoid_thresholds:
-            self.accuracy = binary_accuracy(pred_labels, labels)
-            self.precision = binary_precision(pred_labels, labels)
-            self.recall = binary_recall(pred_labels, labels)
-            self.f1_score = binary_f1_score(pred_labels, labels)
+    def measure(self, scores: torch.Tensor | None, pred_labels: torch.Tensor | None, labels: torch.Tensor | None, avoid_curves: bool = False, avoid_thresholds: bool = False):
+        if not avoid_thresholds and pred_labels is not None and labels is not None:
+            self.accuracy = binary_accuracy(pred_labels, labels).item()
+            self.precision = binary_precision(pred_labels, labels).item()
+            self.recall = binary_recall(pred_labels, labels).item()
+            self.f1_score = binary_f1_score(pred_labels, labels).item()
         
-        if not avoid_curves:
-            self.auroc = binary_auroc(scores.float(), labels.int())
-            self.auprc =  binary_auprc(scores.float(), labels.int())
+        if not avoid_curves and scores is not None and labels is not None:
+            self.auroc = binary_auroc(scores.float(), labels.int()).item()
+            self.auprc =  binary_auprc(scores.float(), labels.int()).item()
         
     def get_dict(self, avoid_curves: bool = False, avoid_thresholds: bool = False):
         if avoid_curves and avoid_thresholds:
             raise ValueError("Cannot avoid both curves and thresholds. Please choose one or neither.")
         
-        ret_dict = {}
+        ret_dict: Dict[str, float] = {}
     
         if not avoid_thresholds:
             ret_dict = ret_dict | {
