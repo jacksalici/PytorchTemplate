@@ -1,7 +1,6 @@
 
 
 from models.transformer import Transformer
-
 from experiments.exp_toysort import ToySortExperiment, CustomCrossEntropyLoss
 
 import torch
@@ -44,7 +43,10 @@ def main():
         logger.print_config(config.to_dict())
         
         # Load data
-        if config.dataloader == "toysort_ds":
+        if config.dataloader == "example_ds":
+            import dataloaders.example_dataloader as get_dataloaders
+            raise NotImplementedError("Please implement the example dataloader.")
+        elif config.dataloader == "toysort_ds":
             from dataloaders.toy_dataloader import get_dataloaders
             train_loader, test_loader = get_dataloaders(
                 batch_size=config.batch_size, 
@@ -53,7 +55,6 @@ def main():
                 length=config.seq_len,
                 num_digits=config.num_digits,
             )
-        
         else:
             raise ValueError(f"Unknown dataloader: {config.dataloader}")
         
