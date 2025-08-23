@@ -1,9 +1,22 @@
+"""
+Unified logging utility combining console output with optional remote tracking
+
+This module provides a flexible logging interface that combines Python's
+standard logging with optional Weights & Biases integration.
+It enables logging text messages at different severity levels and structured
+data like metrics and configurations in both local and remote contexts.
+"""
+
 import json
 import logging
-from typing import Literal
+from typing import Any, Dict, Literal
 
 
 class Logger:
+    """
+    Provides console logging and optional Weights & Biases integration.
+    """
+
     _logging_levels = {
         "debug": logging.DEBUG,
         "info": logging.INFO,
@@ -18,7 +31,7 @@ class Logger:
         project_name: str,
         log_level=Literal["debug", "info", "warning", "error"],
         avoid_wandb: bool = True,
-        remote_logger_run_name: str = None,
+        remote_logger_run_name: str | None = None,
         separator: str = "|",
         multi_line: bool = True,
     ):
@@ -26,12 +39,12 @@ class Logger:
         Initializes the Logger instance.
 
         Args:
-            project_name (str): Name of the project for logging.
-            log_level (Literal["debug", "info", "warning", "error"], optional): Logging level. Defaults to "info".
-            avoid_wandb (bool, optional): If True, avoids using Weights & Biases for logging. Defaults to True.
-            remote_logger_run_name (str, optional): Name for the remote logger run. Defaults to None.
-            separator (str, optional): Separator used in log dict messages. Defaults to "|".
-            multi_line (bool, optional): If True, formats log dict messages in multiple lines. Defaults to True.
+            project_name: Name of the project for logging.
+            log_level: Logging level. Defaults to "info".
+            avoid_wandb: If True, avoids using Weights & Biases for logging. Defaults to True.
+            remote_logger_run_name: Name for the remote logger run. Defaults to None.
+            separator: Separator used in log dict messages. Defaults to "|".
+            multi_line: If True, formats log dict messages in multiple lines. Defaults to True.
         """
 
         self.logger = logging.getLogger(project_name)
@@ -50,8 +63,10 @@ class Logger:
         if not avoid_wandb:
             self._init_wandb(project_name, remote_logger_run_name)
 
-    def print_config(self, config_dict) -> None:
-        """Prints the configuration dictionary to the console and logs it where needed.
+    def print_config(self, config_dict: Dict[str, Any]) -> None:
+        """
+        Prints the configuration dict to the console and logs it where needed.
+
         Args:
             config_dict (dict): Configuration dictionary to print.
         """
@@ -66,14 +81,17 @@ class Logger:
         info: dict | str,
         level: Literal["debug", "info", "warning", "error"] = "info",
     ) -> None:
-        
-        """Send information to the logger. This can be used to log metrics, parameters, or any other information.
-        It will log to the console and, if wandb is not avoided, to wandb as well.
+        """
+        Send information to the logger.
+
+        This can be used to log metrics, parameters, or any other information.
+        It will log to the console and to wandb as well (if enabled).
 
         Args:
-            info (dict or str): Information to log, typically a dictionary of metrics or parameters or a string message.
-            level (Literal["debug", "info", "warning", "error"], optional): The logging level of the message. Defaults to "info".
-
+            info: Information to log, typically a dictionary of metrics or
+                parameters or a string message.
+            level The logging level of the message. Defaults to "info".
+                - Available levels: "debug", "info", "warning", "error".
         """
         assert isinstance(info, (dict, str)), "Info must be a dictionary or a string."
 
@@ -89,17 +107,16 @@ class Logger:
                 if not self.multi_line
                 else json.dumps(info, indent=4)
             )
-        
+
         # Case 2: info is a string
-        elif isinstance(info, str):
+        else:
             log_message = info
-            
 
         logging_level = self._logging_levels.get(level, logging.INFO)
 
         self.logger.log(logging_level, log_message)
 
-    def _init_wandb(self, project_name, remote_logger_run_name=None):
+    def _init_wandb(self, project_name: str, remote_logger_run_name: str | None = None):
         try:
             import wandb
 
@@ -107,6 +124,7 @@ class Logger:
             self._wandb = wandb
         except ImportError:
             self.logger.warning(
-                "Weights & Biases (wandb) is not installed. Please install it to use wandb logging."
+                "Weights & Biases (wandb) is not installed. "
+                "Please install it to use wandb logging."
             )
             self._wandb = None
