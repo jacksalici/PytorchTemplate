@@ -1,22 +1,21 @@
 # Pytorch Template 🔧
 
 ![Open Issues](https://img.shields.io/github/issues/jacksalici/PytorchTemplate) ![GitHub Repo stars](https://img.shields.io/github/stars/jacksalici/PytorchTemplate?style=flat) ![Static Badge](https://img.shields.io/badge/made_with-pizza_and_coffee-lightgray) ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white&style=flat) [![Licence](https://img.shields.io/github/license/jacksalici/PyTorchTemplate?style=for-the-badge&style=flat)](./LICENSE)
-
-
-
  
 > A custom template for scalable PyTorch projects with flexible configuration management. Designed to be ready in minimal time while remaining maintainable and scalable. ♻️ 
+
+⚠️ This template is still in _beta_ and may undergo significant changes. Feedback and contributions are welcome!
 
 ## Template Structure 📂
 ```bash
 PytorchTemplate/
 ├── readme.md  👈 You are here
-├── requirements.txt             
+├── requirements.txt            
 ├── run.py 
 ├── configs/ 
 │   ├── config.py             
-│   └── default.yaml
-│    ...
+│   ├── default.yaml
+│   └── ...
 ├── dataloaders/ 
 │   └── ...                      
 ├── experiments/ 
@@ -24,9 +23,12 @@ PytorchTemplate/
 │   └── ...
 ├── models/                      
 │   ├── base.py                  
-│   ...
+│   └── ...
 └── utils/                       
-	├── ...                      
+	├── logger.py
+	├── binary_metrics.py   
+	├── reproducibility.py
+	└── ...                 
 ```
 
 - **`run.py`**: Main entry point that handles configuration loading and experiment execution.
@@ -34,7 +36,7 @@ PytorchTemplate/
 - **`experiments/`**: Modular experiment classes that define training/inference logic. For larger projects, you may want a file for each experiment, such as forecasting, classification, etc.
 - **`models/`**: PyTorch model implementations with a common base class that inherits all methods from `torch.nn.Module`.
 - **`dataloaders/`**: Data loading and preprocessing modules.
-- **`utils/`**: Shared utilities for logging, metrics, plotting, and reproducibility. **Wandb** is wrapped in the `logger
+- **`utils/`**: Shared utilities for logging, metrics, plotting, and reproducibility. **Wandb** comes pre-integrated in the logger.
 
 ## Installation 🧨
 
@@ -48,6 +50,12 @@ PytorchTemplate/
 	python3 -m venv .venv
 	pip3 install -r requirements.txt
 	```
+
+🚯 To remove all files regarding the toy problem below and start with a fresly minted template run the following command!
+```bash
+bash cleanup.sh
+```
+
 
 ## Training and Inference 🚀
 
@@ -81,10 +89,7 @@ The template is developed as my personal starting point for new PyTorch projects
 
 The template will be updated as I discover new features to add or encounter bugs. If you have any suggestions or issues, feel free to open an issue on the repository.
 
-### Roadmap 🚧:
-- [ ] More baseline models and experiments.
-- [ ] Custom plotting utilities for better visualization.
-- [ ] Better logging and metrics tracking.
-- [ ] SLURM integration.
+## License 📜
+[MIT License](./LICENSE)
 
  
