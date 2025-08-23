@@ -12,7 +12,7 @@ class MetricResults:
     auroc: float = 0.0
     auprc: float = 0.0 
     
-    def measure(self, scores, pred_labels, labels, avoid_curves = False, avoid_thresholds = False):       
+    def measure(self, scores: torch.Tensor, pred_labels: torch.Tensor, labels: torch.Tensor, avoid_curves: bool = False, avoid_thresholds: bool = False):
         if not avoid_thresholds:
             self.accuracy = binary_accuracy(pred_labels, labels)
             self.precision = binary_precision(pred_labels, labels)
@@ -23,7 +23,7 @@ class MetricResults:
             self.auroc = binary_auroc(scores.float(), labels.int())
             self.auprc =  binary_auprc(scores.float(), labels.int())
         
-    def get_dict(self, avoid_curves = False, avoid_thresholds = False):
+    def get_dict(self, avoid_curves: bool = False, avoid_thresholds: bool = False):
         if avoid_curves and avoid_thresholds:
             raise ValueError("Cannot avoid both curves and thresholds. Please choose one or neither.")
         
@@ -49,7 +49,7 @@ class MetricResults:
         return ', '.join([f"{key}: {value:.4f}" for key, value in self.get_dict().items()])
 
 class Metrics():
-    def __init__(self, avoid_curves = False, avoid_thresholds = False):
+    def __init__(self, avoid_curves: bool = False, avoid_thresholds: bool = False):
         self.avoid_curves = avoid_curves
         self.avoid_thresholds = avoid_thresholds
         self._scores: List[torch.Tensor] = []
@@ -61,7 +61,7 @@ class Metrics():
         self._pred_labels = []
         self._labels = []
 
-    def update(self, scores = None, pred_labels = None, labels = None):
+    def update(self, scores: torch.Tensor | None = None, pred_labels: torch.Tensor | None = None, labels: torch.Tensor | None = None) -> None:
         if scores is not None:
             self._scores.append(scores)
         if pred_labels is not None:
@@ -69,7 +69,7 @@ class Metrics():
         if labels is not None:
             self._labels.append(labels)
     
-    def compute(self):
+    def compute(self) -> MetricResults:
         result = MetricResults()
         result.measure(
             scores = torch.cat(self._scores) if self._scores else None,
