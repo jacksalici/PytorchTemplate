@@ -29,7 +29,7 @@ class Logger:
     def __init__(
         self,
         project_name: str,
-        log_level: Literal["debug", "info", "warning", "error"]="info",
+        log_level: Literal["debug", "info", "warning", "error"] = "info",
         avoid_wandb: bool = True,
         remote_logger_run_name: str | None = None,
         separator: str = "|",
@@ -128,3 +128,38 @@ class Logger:
                 "Please install it to use wandb logging."
             )
             self._wandb = None
+
+
+def demo():
+    """
+    Demonstrates the usage of the Logger class.
+    """
+    logger = Logger(project_name="LoggerDemo", log_level="info")
+
+    # log string messages
+    logger("This is a test log message.", level="info")
+    logger("This is a warning message.", level="warning")
+    logger("This is an error message.", level="error")
+
+    # log a debug message
+    # - this should not appear since log_level is set to "info"
+    logger("This is a debug message.", level="debug")
+
+    # log a dummy metrics dictionary
+    metrics = {
+        "val_accuracy": 0.92,
+        "val_loss": 0.042,
+    }
+    logger(metrics, level="info")
+
+    # log dummy configuration dictionary
+    config = {
+        "lr": 0.0005,
+        "batch_size": 64,
+        "num_epochs": 8,
+    }
+    logger.print_config(config)
+
+
+if __name__ == "__main__":
+    demo()
