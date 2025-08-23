@@ -99,9 +99,7 @@ def get_dataloaders(
         pin_memory: Whether to pin memory for faster GPU transfer
         length: Length of sequences to sort
         num_digits: Number of possible digit values
-        train_size: Size of training dataset
-        test_size: Size of test dataset
-    
+   
     Returns:
         Tuple of (train_loader, test_loader)
     """
