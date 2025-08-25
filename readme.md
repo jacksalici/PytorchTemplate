@@ -26,8 +26,8 @@ PytorchTemplate/
 │   └── ...
 └── utils/                       
     ├── logger.py
-	   ├── binary_metrics.py   
-	   ├── reproducibility.py
+    ├── binary_metrics.py
+    ├── reproducibility.py
     └── ...                 
 ```
 
