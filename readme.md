@@ -25,10 +25,10 @@ PytorchTemplate/
 │   ├── base.py                  
 │   └── ...
 └── utils/                       
-	├── logger.py
-	├── binary_metrics.py   
-	├── reproducibility.py
-	└── ...                 
+    ├── logger.py
+	   ├── binary_metrics.py   
+	   ├── reproducibility.py
+    └── ...                 
 ```
 
 - **`run.py`**: Main entry point that handles configuration loading and experiment execution.
@@ -51,7 +51,7 @@ PytorchTemplate/
 	pip3 install -r requirements.txt
 	```
 
-🚯 To remove all files regarding the toy problem below and start with a fresly minted template run the following command!
+🚯 To remove all files regarding the toy problem below and start with a freshly minted template run the following command!
 ```bash
 bash cleanup.sh
 ```
