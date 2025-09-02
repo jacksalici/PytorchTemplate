@@ -1,31 +1,9 @@
-from typing import List, Tuple
+from typing import List, Tuple, Set
 
 import torch
 from torch.utils.data import DataLoader, Dataset
 
 SortDatasetSample = Tuple[torch.Tensor, torch.Tensor]
-
-
-def is_in_list(query: SortDatasetSample, sample_list: List[SortDatasetSample]) -> bool:
-    """
-    Check if a dataset sample is contained in a list of samples.
-
-    WARNING: this function is not optimized for performance,
-        but is sufficient for utility purposes within this toy dataset.
-
-    Args:
-        query: Sample to check
-        sample_list: List of samples to check against
-
-    Returns:
-        True if the query sample is in sample_list, False otherwise
-    """
-    for s in sample_list:
-        # to tell if two samples are equal, we can just check if their inputs
-        # are equal, since outputs are deterministic given inputs
-        if torch.equal(query[0], s[0]):
-            return True
-    return False
 
 
 class SortDataset(Dataset):
@@ -48,14 +26,14 @@ class SortDataset(Dataset):
         length: int = 6,
         num_digits: int = 3,
         size: int = 10000,
-        avoid_samples: List[Tuple[torch.Tensor, torch.Tensor]] | None = None,
+        avoid_list: List[Tuple[torch.Tensor, torch.Tensor]] | None = None,
     ) -> None:
         """ "
         Args:
             length: Length of input sequence to sort
             num_digits: Number of possible digit values (0 to num_digits-1)
             size: Dataset size (for consistent iteration)
-            avoid_samples: List of samples to avoid;
+            avoid_list: List of samples to avoid;
                 - useful to avoid overlap between train and test sets; to
                   do so, init the train set first with this argument as None,
                   then init the test set with this argument as the list of
@@ -65,21 +43,34 @@ class SortDataset(Dataset):
         self.num_digits = num_digits
         self.size = size
 
-        if avoid_samples is None:
-            avoid_samples = []
+        if avoid_list is None:
+            avoid_list = []
 
-        if size + len(avoid_samples) > num_digits**length:
+        if size + len(avoid_list) > num_digits**length:
             raise ValueError(
-                f"Cannot create dataset of size {size} with {len(avoid_samples)} "
+                f"Cannot create dataset of size {size} with {len(avoid_list)} "
                 f"avoided samples, given num_digits={num_digits} and length={length}. "
                 f"You can have at most {num_digits**length} unique sequences."
             )
 
         self.data: List[SortDatasetSample] = []
+
+        # set used to quickly check if a newly generated sample is part of
+        # `avoid_list` (to avoid overlap between self.data and avoid_list)
+        #   - NOTE: it contains hashable representations of the input sequences from
+        #     the samples contained in avoid_list; we just need the input sequences
+        #     since outputs are deterministic given inputs
+        avoid_set = set([s[0].numpy().tobytes() for s in avoid_list])
+
+        # set used to quickly check if a newly generated sample is already
+        # part of self.data (to avoid duplicates within the dataset)
+        data_set: Set[bytes] = set([])
+
         while len(self.data) < size:
             s = self._generate_example()
-            # avoid duplicates and overlap with avoid_samples
-            if not is_in_list(s, self.data) and not is_in_list(s, avoid_samples):
+            hashable_s = s[0].numpy().tobytes()
+            if (hashable_s not in avoid_set) and (hashable_s not in data_set):
+                avoid_set.add(hashable_s)
                 self.data.append(s)
 
     def __len__(self) -> int:
@@ -149,7 +140,7 @@ def get_dataloaders(
     Returns:
         Tuple of (train_loader, test_loader)
     """
-    train_dataset = SortDataset(length, num_digits, 64**2)
+    train_dataset = SortDataset(length, num_digits, 2**13)
     test_dataset = SortDataset(length, num_digits, 64 * 10)
 
     train_loader = DataLoader(
