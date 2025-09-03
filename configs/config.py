@@ -1,6 +1,6 @@
 import yaml
 import argparse
-from dataclasses import dataclass, field, fields, MISSING
+from dataclasses import dataclass, field, fields, MISSING, make_dataclass
 from typing import Any, Dict, Optional, Self, List, Literal
 from pathlib import Path
 import torch
@@ -162,15 +162,24 @@ class Config:
             # Apply additional override args if provided
             config_dict.update(override_args)
         
-        # Create instance with known fields only and add extra fields as attributes
-        known_config_dict = {k: v for k, v in config_dict.items() if k in known_fields}
-        instance = cls(**known_config_dict)
+        # Create a NEW dataclass with additional fields from config
+        unknown_fields = {k: v for k, v in config_dict.items() if k not in known_fields}
         
-        for key, value in config_dict.items():
-            if key not in known_fields:
-                setattr(instance, key, value)
-        
-        return instance
+        if unknown_fields:
+            new_fields = [(field_name, type(field_value), field(default=field_value)) 
+                 for field_name, field_value in unknown_fields.items()]
+            
+            DynamicConfig = make_dataclass(
+            'Config',
+            new_fields,
+            bases=(cls,)
+            )
+            
+            return DynamicConfig(**config_dict)
+        else:
+            # No unknown fields, use original class
+            known_config_dict = {k: v for k, v in config_dict.items() if k in known_fields}
+            return cls(**known_config_dict)
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert config to dictionary"""
