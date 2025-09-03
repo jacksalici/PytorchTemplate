@@ -140,7 +140,7 @@ def get_dataloaders(
     Returns:
         Tuple of (train_loader, test_loader)
     """
-    train_dataset = SortDataset(length, num_digits, 4096)
+    train_dataset = SortDataset(length, num_digits, 12000)
     test_dataset = SortDataset(length, num_digits, 640, avoid_list=train_dataset.data)
 
     train_loader = DataLoader(

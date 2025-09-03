@@ -6,7 +6,7 @@ device: "cpu"
 # Training settings
 lr: 0.0005  
 batch_size: 64  
-num_epochs: 5
+num_epochs: 8
 
 # Optimizer settings
 optim: "adamw"
