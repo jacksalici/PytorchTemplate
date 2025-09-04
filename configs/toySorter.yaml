@@ -14,7 +14,7 @@ dataloader: "toysort_ds"
 
 # Task specific settings
 seq_len: 6
-num_digits: 3
+num_digits: 5
 
 # Optimizer settings
 optim: "adamw"
