@@ -144,13 +144,13 @@ class ToySortExperiment(BaseExperiment):
             logger: Logger instance for logging results.
                 If None, prints to console.
         """
-        input = torch.randint(0, model.num_digits, (1, 6), dtype=torch.long)
+        input_seq = torch.randint(0, model.num_digits, (1, 6), dtype=torch.long)
         model.eval()
         with torch.no_grad():
-            generated = model.generate(input, max_length=6)
+            generated = model.generate(input_seq, max_length=6)
 
         if logger is None:
             logger = print  # very pythonic :)
 
-        logger("Input Sequence:", input.tolist()[0])
+        logger("Input Sequence:", input_seq.tolist()[0])
         logger("Generated Sequence:", generated.tolist()[0][6:])
