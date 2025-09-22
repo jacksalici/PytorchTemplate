@@ -1,3 +1,10 @@
+"""
+This module provides a synthetic dataset and dataloader utilities for
+training causal (autoregressive) transformer models on the "Sort" problem.
+
+Based on: https://github.com/karpathy/minGPT/blob/master/demo.ipynb
+"""
+
 from typing import List, Set, Tuple
 
 import torch
@@ -8,15 +15,25 @@ SortDatasetSample = Tuple[torch.Tensor, torch.Tensor]
 
 class SortDataset(Dataset):
     """
-    Dataset for the Sort problem. E.g. for problem length 6:
-    Input: 0 0 2 1 0 1 -> Output: 0 0 0 1 1 2
+    Dataset for the "Sort" problem.
 
-    The transformer receives concatenated input-output as:
-    input:  0 0 2 1 0 1 0 0 0 1 1
-    output: I I I I I 0 0 0 1 1 2
-    where I is "ignore" (masked with -1 during training)
+    This is designed for the training of a causal (autoregressive) transformer,
+    whose goal is to take an input sequence of digits and autoregressively
+    generate its sorted version.
 
-    Based on: https://github.com/karpathy/minGPT/blob/master/demo.ipynb
+    Example (when length = 6):
+        - Input sequence:     [0, 0, 2, 1, 0, 1]
+        - Sorted sequence:    [0, 0, 0, 1, 1, 2]
+
+        - Model input (x):    [0, 0, 2, 1, 0, 1, 0, 0, 0, 1, 1]
+            - the model input consists of the input sequence followed by
+              the sorted sequence (excluding the last element)
+
+        - Target output (y):  [-1, -1, -1, -1, -1, 0, 0, 0, 1, 1, 2]
+            - the target output consists of the input sequence (excluding the
+              first element) followed by the sorted sequence
+            - note that positions corresponding to the input sequence are masked
+              with -1 and do not contribute to the loss during training
     """
 
     def __init__(
@@ -25,7 +42,7 @@ class SortDataset(Dataset):
         length: int,
         num_digits: int,
     ) -> None:
-        """ "
+        """
         Args:
             length: Length of input sequence to sort
             num_digits: Number of possible digit values (0 to num_digits-1)
@@ -38,14 +55,21 @@ class SortDataset(Dataset):
     def __len__(self) -> int:
         return len(self.samples)
 
+    @property
     def get_vocab_size(self) -> int:
-        """Returns vocabulary size for the model."""
+        """
+        Returns:
+            vocabulary size for the model.
+        """
         return self.num_digits
 
+    @property
     def get_block_size(self) -> int:
         """
-        Returns sequence length for transformer input.
-        Concatenated input + output - 1 (since transformer predicts next token).
+        Returns:
+            Length of the input sequence for the model, which is the
+            concatenation of the input sequence and the sorted sequence
+            (excluding the last element, hence the -1).
         """
         return self.length * 2 - 1
 
@@ -54,8 +78,8 @@ class SortDataset(Dataset):
         Generate a training example.
 
         Returns:
-            x: Input sequence (concatenated input + partial output)
-            y: Target sequence (shifted by 1, with input positions masked as -1)
+            x: Model input sequence
+            y: Target output sequence
         """
         return self.samples[idx]
 
@@ -64,17 +88,17 @@ def _generate_example(
     length: int, num_digits: int, boost_repeats_prob: float = 0.4
 ) -> SortDatasetSample:
     """
-    Generate a single input sequence for the sort task.
+    Randomly generates a single example for the sort task.
 
     Args:
         length: Length of input sequence to sort
         num_digits: Number of possible digit values (0 to num_digits-1)
-        boost_repeats_prob: Probability to boost examples with many repeated digits
+        boost_repeats_prob: Probability to boost examples with repeated digits
 
     Returns:
         Tuple of (x, y) where:
-        - x: Input sequence (concatenated input + partial output)
-        - y: Target sequence (shifted by 1, with input positions masked as -1)
+            - x: Model input sequence
+            - y: Target output sequence
     """
     # Generate random sequence
     inp = torch.randint(num_digits, size=(length,), dtype=torch.long)
@@ -84,7 +108,7 @@ def _generate_example(
     if torch.rand(1).item() < boost_repeats_prob:
         unique_count = inp.unique().numel()
         if unique_count > length // 2:
-            num_unique = torch.randint(1, length // 2 + 1, (1,)).item()
+            num_unique = int(torch.randint(1, length // 2 + 1, (1,)).item())
             unique_vals = torch.randperm(num_digits)[:num_unique]
             inp = unique_vals[torch.randint(num_unique, (length,))]
 
@@ -109,6 +133,9 @@ def get_dataloaders(
 ) -> Tuple[DataLoader, DataLoader]:
     """
     Create train and test dataloaders for the sort task.
+
+    Both training and testing datasets are randomly generated, ensuring
+    that all sequences are unique within and across the sets.
 
     Args:
         batch_size: Batch size for dataloaders
