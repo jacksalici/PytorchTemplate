@@ -56,7 +56,7 @@ class SortDataset(Dataset):
         return len(self.samples)
 
     @property
-    def get_vocab_size(self) -> int:
+    def vocab_size(self) -> int:
         """
         Returns:
             vocabulary size for the model.
@@ -64,7 +64,7 @@ class SortDataset(Dataset):
         return self.num_digits
 
     @property
-    def get_block_size(self) -> int:
+    def block_size(self) -> int:
         """
         Returns:
             Length of the input sequence for the model, which is the
