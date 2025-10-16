@@ -11,6 +11,29 @@ num_epochs: 8
 # Optimizer settings
 optim: "adamw"
 
+# Learning Rate Scheduler settings
+use_scheduler: false
+scheduler_type: "step"
+scheduler_params:
+  step_size: 30
+  gamma: 0.1
+scheduler_metric: "Test Loss"
+scheduler_mode: "min"
+
+# Early Stopping settings
+use_early_stopping: false
+early_stopping_patience: 10
+early_stopping_min_delta: 0.0
+early_stopping_metric: "Test Loss"
+early_stopping_mode: "min"
+early_stopping_restore_best_weights: true
+
+# Model saving and resuming
+model_saving_metric: "Test Loss"
+model_saving_mode: "min"
+resume_training: false
+# resume_checkpoint_path: "checkpoints/transformer.pth"  # Optional: specify custom checkpoint path
+
 # Logging and saving
 avoid_wandb: true
 save_model: true

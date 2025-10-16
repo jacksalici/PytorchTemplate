@@ -38,6 +38,7 @@ def main():
         project_name = config.project_name,
         avoid_wandb = config.avoid_wandb)
     
+    
     if config.task == "training":
     
         logger.print_config(config.to_dict())
@@ -83,10 +84,15 @@ def main():
 
     elif config.task == "inference":
         logger(f"Running inference for {config.experiment} on {config.model_name} model...")
-        model = torch.load(
-            config.get_checkpoint_path(), map_location=device, weights_only=False
-        )
-        logger(f"Loaded model from {config.get_checkpoint_path()}.")
+        
+        # Try to load as new checkpoint format first, then fall back to old format
+        checkpoint_path = config.get_checkpoint_path()
+        checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
+
+        if config.model_name in models:
+            model = models[config.model_name]["model"](**config.to_dict()).to(device)
+            model.load_state_dict(checkpoint['model_state_dict'])
+            logger(f"Loaded model state from new checkpoint format: {checkpoint_path}")
 
         if config.experiment in experiments:
             exp = experiments[config.experiment]["experiment"]
