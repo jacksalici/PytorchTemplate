@@ -64,9 +64,30 @@ class Config:
     # Optimizer settings
     optim: str = "adam"
     
+    # Learning Rate Scheduler settings
+    use_scheduler: bool = False
+    scheduler_type: str = "step"
+    scheduler_params: Optional[Dict[str, Any]] = None
+    scheduler_metric: str = "Test Loss"
+    scheduler_mode: Literal["min", "max"] = "min"
+    
+    # Early Stopping settings
+    use_early_stopping: bool = False
+    early_stopping_patience: int = 10
+    early_stopping_min_delta: float = 0.0
+    early_stopping_metric: str = "Test Loss"
+    early_stopping_mode: Literal["min", "max"] = "min"
+    early_stopping_restore_best_weights: bool = True
+    
+    # Model saving and resuming
+    save_model: bool = True
+    model_saving_metric: str = "Test Loss"
+    model_saving_mode: Literal["min", "max"] = "min"
+    resume_training: bool = False
+    resume_checkpoint_path: Optional[str] = None
+    
     # Logging and saving
     avoid_wandb: bool = False
-    save_model: bool = True
     checkpoint_path: str = "checkpoints"
     checkpoint_name: Optional[str] = None
     
