@@ -1,6 +1,6 @@
 # Pytorch Template 🔧
 
-![Open Issues](https://img.shields.io/github/issues/proj27/PytorchTemplate) ![GitHub Repo stars](https://img.shields.io/github/stars/proj27/PytorchTemplate?style=flat) ![Static Badge](https://img.shields.io/badge/made_with-pizza_and_coffee-lightgray) ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white&style=flat) [![Licence](https://img.shields.io/github/license/proj27/PyTorchTemplate?style=for-the-badge&style=flat)](./LICENSE)
+![Open Issues](https://img.shields.io/github/issues/proj27/pytorchtemplate) ![GitHub Repo stars](https://img.shields.io/github/stars/proj27/pytorchtemplate?style=flat) ![Static Badge](https://img.shields.io/badge/made_with-pizza_and_coffee-lightgray) ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white&style=flat) [![Licence](https://img.shields.io/github/license/proj27/pytorchtemplate?style=for-the-badge&style=flat)](./LICENSE)
  
 > A custom template for scalable PyTorch projects with flexible configuration management. Designed to be ready in minimal time while remaining maintainable and scalable. ♻️ 
 
