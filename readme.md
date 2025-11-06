@@ -1,10 +1,8 @@
 # Pytorch Template 🔧
 
-![Open Issues](https://img.shields.io/github/issues/jacksalici/PytorchTemplate) ![GitHub Repo stars](https://img.shields.io/github/stars/jacksalici/PytorchTemplate?style=flat) ![Static Badge](https://img.shields.io/badge/made_with-pizza_and_coffee-lightgray) ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white&style=flat) [![Licence](https://img.shields.io/github/license/jacksalici/PyTorchTemplate?style=for-the-badge&style=flat)](./LICENSE)
+![Open Issues](https://img.shields.io/github/issues/proj27/PytorchTemplate) ![GitHub Repo stars](https://img.shields.io/github/stars/proj27/PytorchTemplate?style=flat) ![Static Badge](https://img.shields.io/badge/made_with-pizza_and_coffee-lightgray) ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white&style=flat) [![Licence](https://img.shields.io/github/license/proj27/PyTorchTemplate?style=for-the-badge&style=flat)](./LICENSE)
  
 > A custom template for scalable PyTorch projects with flexible configuration management. Designed to be ready in minimal time while remaining maintainable and scalable. ♻️ 
-
-⚠️ This template is still in _beta_ and may undergo significant changes. Feedback and contributions are welcome!
 
 ## Template Structure 📂
 ```bash
@@ -85,9 +83,9 @@ Configuration is handled by the `configs/config.py` file, which provides:
 This means that the configuration priority is (from highest to lowest): (1) command-line arguments, (2) YAML configuration file values, and (3) default values in the `Config` class.
 
 ## Notes 📝
-The template is developed as my personal starting point for new PyTorch projects. There is a trade-off when developing this type of template: the goal is to write the maximum amount of [reusable code to save time](https://imgs.xkcd.com/comics/code_lifespan.png) in the future while avoiding to add complexity and knowledge overhead. I _hope_ this strikes the right balance. It should be easy to understand and extend, while also providing a solid foundation for scalable projects.
+There is a trade-off when developing this type of template: the goal is to write the maximum amount of [reusable code to save time](https://imgs.xkcd.com/comics/code_lifespan.png) in the future while avoiding to add complexity and knowledge overhead. Contributors _hope_ this strikes the right balance. It should be easy to understand and extend, while also providing a solid foundation for scalable projects. Yet, there is still a subjective element to this, so others may find it too simple or too complex.
 
-The template will be updated as I discover new features to add or encounter bugs. If you have any suggestions or issues, feel free to open an issue on the repository.
+For any suggestions or issues, feel free to open an issue on the repository.
 
 ## License 📜
 [MIT License](./LICENSE)
